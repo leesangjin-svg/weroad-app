@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1B2A4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="위펀 수리등록">
+<link rel="icon" href="../driver/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../driver/icon-192.png">
+<title>위펀 차량 수리 등록 (지정 공업사)</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;background:#F3F5F9;color:#1A2233;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  body{padding:max(14px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .brand .lg{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3E6AF2,#14B8A6);display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff}
+  .brand b{font-size:17px}.brand small{color:#667085;margin-left:4px}
+  .shop{margin-left:auto;font-weight:800;color:#fff;background:var(--c,#3E6AF2);border-radius:999px;padding:5px 12px;font-size:13px}
+  .card{background:#fff;border:1px solid #E5EAF2;border-radius:18px;padding:16px;margin-bottom:12px}
+  h2{margin:0 0 4px;font-size:20px}.sub{color:#667085;font-size:13px;margin-bottom:10px}
+  label{display:block;font-size:13px;color:#475467;font-weight:700;margin:12px 0 5px}
+  input,select,textarea{width:100%;border:1px solid #DCE3EE;border-radius:12px;padding:12px;font-size:17px;font-family:inherit;color:#1A2233;background:#fff}
+  input.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+  textarea{min-height:80px;resize:vertical;font-size:15px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid #DCE3EE;background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;font-weight:700;color:#344054}
+  .chips button.on{background:#1A2233;border-color:#1A2233;color:#fff}
+  .plate{display:flex;gap:8px}.plate input{flex:1}.plate button{border:1px solid #DCE3EE;background:#fff;border-radius:12px;padding:0 14px;font:inherit;font-weight:700}
+  .hint{font-size:12.5px;color:#667085;margin-top:6px;line-height:1.5}.hint b{color:#B42318}
+  .big{width:100%;border:0;border-radius:16px;padding:18px;font-size:19px;font-weight:800;color:#fff;background:linear-gradient(135deg,#3E6AF2,#2449C9);box-shadow:0 10px 26px rgba(62,106,242,.3);font-family:inherit;margin:6px 0 12px}
+  .big:disabled{opacity:.5;box-shadow:none}
+  .ok{background:#ECFDF3;border-color:#A6E9C5;color:#067647}.warn{background:#FEF3F2;border-color:#FECDCA;color:#B42318}
+  .hist div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #F0F3F8;font-size:14px}.hist div:first-child{border-top:0}
+  .hist b{font-variant-numeric:tabular-nums;white-space:nowrap}.hist small{display:block;color:#667085;font-size:12px}
+  .tag{display:inline-block;font-size:11px;font-weight:800;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+  .t-wait{background:#FFF3DD;color:#8F5300}.t-ok{background:#E3F6EC;color:#147A47}.t-no{background:#FEECEC;color:#C4262C}
+  .photo{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.photo img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid #E5EAF2}
+  .setup input{font-size:15px}
+  .foot{font-size:11.5px;color:#98A2B3;text-align:center;padding-top:10px}
+</style>
+</head>
+<body>
+<div class="brand"><span class="lg">W</span><b>위펀 차량 수리 등록</b><small>지정 공업사</small><span class="shop" id="shopName" hidden></span></div>
+
+<div id="setup" class="card setup" hidden>
+  <h2>접속 설정</h2><div class="sub">위펀 물류팀이 보낸 링크로 열면 자동으로 채워집니다</div>
+  <label>공업사 이름</label><input id="s-shop" placeholder="오토대안">
+  <label>서버 주소</label><input id="s-s" placeholder="https://xxxx.supabase.co">
+  <label>서버 키</label><input id="s-k" type="password">
+  <button class="big" id="s-ok">저장하고 시작</button>
+</div>
+
+<div id="main" hidden>
+  <div class="card">
+    <h2>수리 내역 등록</h2><div class="sub">등록된 건만 정산됩니다. <b>100만원 이상</b>은 위펀 승인 후 정산돼요.</div>
+    <label>차량번호</label><div class="plate"><input id="r-plate" placeholder="83수1306" autocomplete="off" list="plates"><datalist id="plates"></datalist></div>
+    <div class="hint" id="r-car"></div>
+    <div class="two"><div><label>수리일</label><input id="r-date" type="date"></div><div><label>입고 계기판 (km)</label><input id="r-km" class="num" inputmode="numeric" placeholder="예: 246720"></div></div>
+    <label>수리 항목 (여러 개 선택)</label><div class="chips" id="r-items"></div>
+    <label>수리 내용</label><textarea id="r-desc" placeholder="예: 엔진오일·오일필터 교환, 앞 브레이크 패드 교환"></textarea>
+    <label>금액 (원, 부가세 포함)</label><input id="r-amt" class="num" inputmode="numeric" placeholder="예: 185000">
+    <div class="hint" id="r-amtHint"></div>
+    <label>사진 (영수증 · 교체 부품, 선택)</label><input id="r-photo" type="file" accept="image/*" multiple capture="environment"><div class="photo" id="r-prev"></div>
+    <label>담당자</label><input id="r-who" placeholder="이름">
+  </div>
+  <button class="big" id="r-save">등록</button>
+  <div class="card ok" id="r-ok" hidden></div>
+  <div class="card warn" id="r-warn" hidden></div>
+  <div class="card"><h2 style="font-size:16px">최근 등록 (이 공업사)</h2><div class="hist" id="r-hist">—</div></div>
+</div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · 수리등록 v1</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const LS = 'wr-shop';
+  const ITEMS = ['오일·소모품', '브레이크', '타이어', '엔진·미션', '하체·조향', '냉각·에어컨', '전기·등화', '배터리', '유리·와이퍼', '판금·도색', '정기검사', '기타'];
+  const SHC = { '오토대안': '#1f9e89', 'HJ모터스': '#d9731f' };
+  let cfg = {}; try { cfg = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { cfg = {}; }
+  const q = new URLSearchParams(location.search);
+  if (q.get('shop') || q.get('su') || q.get('sk')) {
+    cfg = { shop: q.get('shop') || cfg.shop || '', s: (q.get('su') || cfg.s || '').replace(/\/+$/, ''), k: q.get('sk') || cfg.k || '' };
+    try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) { /* noop */ }
+    history.replaceState(null, '', location.pathname);
+  }
+  if (!cfg.shop || !cfg.s || !cfg.k) $('setup').hidden = false;
+  else { $('main').hidden = false; const sn = $('shopName'); sn.hidden = false; sn.textContent = cfg.shop; sn.style.setProperty('--c', SHC[cfg.shop] || '#3E6AF2'); }
+  $('s-shop').value = cfg.shop || ''; $('s-s').value = cfg.s || ''; $('s-k').value = cfg.k || '';
+  $('s-ok').onclick = () => { cfg = { shop: $('s-shop').value.trim(), s: $('s-s').value.trim().replace(/\/+$/, ''), k: $('s-k').value.trim() }; if (!cfg.shop || !cfg.s || !cfg.k) return alert('세 칸을 모두 채워 주세요'); localStorage.setItem(LS, JSON.stringify(cfg)); location.reload(); };
+
+  const H = { apikey: cfg.k, Authorization: 'Bearer ' + cfg.k, 'Content-Type': 'application/json' };
+  const api = async (path, opt = {}) => { const r = await fetch(cfg.s + '/rest/v1/' + path, { ...opt, headers: { ...H, ...(opt.headers || {}) } }); if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + (await r.text()).slice(0, 100)); return r.status === 204 ? null : r.json(); };
+  const normP = (s) => String(s || '').replace(/\s+/g, '').replace(/^(서울|경기|인천|부산|대구|광주|대전|울산|세종|강원|충북|충남|전북|전남|경북|경남|제주)/, '');
+  const won = (n) => Number(n || 0).toLocaleString('ko-KR');
+  const today = () => new Date().toLocaleDateString('sv-SE');
+  let sel = new Set(), fleet = [], photos = [], hist = [];
+  $('r-date').value = today();
+  $('r-items').innerHTML = ITEMS.map((i) => `<button type="button" data-i="${i}">${i}</button>`).join('');
+  $('r-items').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; const i = b.dataset.i; if (sel.has(i)) sel.delete(i); else sel.add(i); b.classList.toggle('on', sel.has(i)); };
+  $('r-amt').oninput = () => { const n = Number(String($('r-amt').value).replace(/[^\d]/g, '')); $('r-amtHint').innerHTML = n >= 1000000 ? '<b>100만원 이상</b> — 위펀 물류팀 승인 뒤 정산됩니다' : n ? won(n) + '원' : ''; };
+  $('r-plate').oninput = () => { const p = normP($('r-plate').value); const v = fleet.find((x) => normP(x.plate) === p); $('r-car').innerHTML = v ? `위펀 차량 ✓ ${v.model || ''}` : (p.length >= 7 ? '<b>위펀 차량 목록에 없는 번호</b>예요. 번호를 다시 확인해 주세요 (그래도 등록은 돼요)' : ''); };
+  $('r-photo').onchange = async () => {
+    photos = [];
+    for (const f of [...$('r-photo').files].slice(0, 4)) photos.push(await shrink(f));
+    $('r-prev').innerHTML = photos.map((p) => `<img src="${p}">`).join('');
+  };
+  function shrink(file) {   // 사진은 긴 변 1000px JPEG로 줄여 저장 (base64, 표 한 칸에)
+    return new Promise((res) => { const img = new Image(); img.onload = () => { const s = Math.min(1, 1000 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.72)); }; img.src = URL.createObjectURL(file); });
+  }
+  async function load() {
+    try { fleet = await api('rpc/shop_plates', { method: 'POST', body: '{}' }); $('plates').innerHTML = fleet.map((v) => `<option value="${v.plate}">`).join(''); } catch (e) { /* 차량 목록은 선택 사항 */ }
+    try {
+      hist = await api('rpc/shop_recent', { method: 'POST', body: JSON.stringify({ p_shop: cfg.shop }) });
+      $('r-hist').innerHTML = hist.map((r) => { const ok = String(r.ok || ''); const tag = r.amt >= 1000000 ? (/^승인/.test(ok) ? '<span class="tag t-ok">승인</span>' : /^반려/.test(ok) ? '<span class="tag t-no">반려</span>' : '<span class="tag t-wait">승인 대기</span>') : ''; return `<div><span>${r.date.slice(5).replace('-', '/')} · <b>${r.plate}</b>${tag}<small>${(r.desc || '').slice(0, 40)}</small></span><b>${won(r.amt)}원</b></div>`; }).join('') || '—';
+    } catch (e) { $('r-hist').textContent = '불러오지 못했습니다 (' + e.message + ')'; }
+  }
+  $('r-save').onclick = async () => {
+    const w = $('r-warn'), ok = $('r-ok'); w.hidden = true; ok.hidden = true;
+    const plate = $('r-plate').value.replace(/\s+/g, '').trim(), date = $('r-date').value, km = Number(String($('r-km').value).replace(/[^\d]/g, '')) || null, amt = Number(String($('r-amt').value).replace(/[^\d]/g, '')), desc = $('r-desc').value.trim(), who = $('r-who').value.trim();
+    const miss = [!plate && '차량번호', !date && '수리일', !sel.size && '수리 항목', !desc && '수리 내용', !amt && '금액', !who && '담당자'].filter(Boolean);
+    if (miss.length) { w.hidden = false; w.textContent = miss.join(', ') + '을(를) 넣어 주세요.'; return; }
+    const no = 'R' + date.slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    const row = { no, date, plate, shop: cfg.shop, items: [...sel], desc, km, amt, who, photos, ok: amt >= 1000000 ? '대기' : '', at: new Date().toISOString() };
+    $('r-save').disabled = true; $('r-save').textContent = '등록 중…';
+    try {
+      await api('repairs', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(row) });
+      ok.hidden = false; ok.innerHTML = `<b>등록됐어요.</b> 접수번호 ${no} · ${plate} · ${won(amt)}원${amt >= 1000000 ? ' · 위펀 승인 뒤 정산' : ''}`;
+      $('r-plate').value = ''; $('r-km').value = ''; $('r-desc').value = ''; $('r-amt').value = ''; $('r-amtHint').textContent = ''; $('r-car').textContent = ''; $('r-photo').value = ''; $('r-prev').innerHTML = ''; photos = []; sel = new Set(); $('r-items').querySelectorAll('button').forEach((b) => b.classList.remove('on'));
+      load();
+    } catch (e) { w.hidden = false; w.textContent = '등록하지 못했습니다 — ' + e.message + ' (잠시 뒤 다시 눌러 주세요)'; }
+    $('r-save').disabled = false; $('r-save').textContent = '등록';
+  };
+  if (!$('main').hidden) load();
+})();
+</script>
+</body>
+</html>

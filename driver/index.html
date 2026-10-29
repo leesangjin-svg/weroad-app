@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1B2A4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="위로드 기사">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>위로드 배송기사웹</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#0F1A33;color:#EAF0FF;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  body{display:flex;flex-direction:column;min-height:100%;padding:max(16px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom))}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .brand .lg{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3E6AF2,#14B8A6);display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff}
+  .brand b{font-size:17px}.brand small{opacity:.6;margin-left:4px}
+  .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:18px;margin-bottom:14px}
+  .name{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .name small{display:block;font-size:13px;font-weight:500;opacity:.6;margin-top:4px}
+  .st{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:15px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#64748B;flex:none}
+  .on .dot{background:#22C55E;box-shadow:0 0 0 6px rgba(34,197,94,.2);animation:p 1.6s infinite}
+  .err .dot{background:#EF4444}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(34,197,94,.35)}100%{box-shadow:0 0 0 12px rgba(34,197,94,0)}}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kv{background:rgba(0,0,0,.18);border-radius:14px;padding:12px 14px}
+  .kv label{display:block;font-size:12px;opacity:.6;margin-bottom:4px}
+  .kv b{font-size:19px;font-weight:800}
+  .kv b i{font-style:normal;font-size:12px;font-weight:500;opacity:.7;margin-left:3px}
+  button.big{width:100%;border:0;border-radius:18px;padding:22px;font-size:22px;font-weight:800;color:#fff;background:linear-gradient(135deg,#22C55E,#14B8A6);box-shadow:0 10px 30px rgba(20,184,166,.35);margin:6px 0 14px;font-family:inherit}
+  button.big.stop{background:linear-gradient(135deg,#EF4444,#F97316);box-shadow:0 10px 30px rgba(239,68,68,.3)}
+  button.big:disabled{opacity:.5;box-shadow:none}
+  .msg{font-size:13.5px;line-height:1.6;opacity:.75}
+  .msg b{color:#FDE68A}
+  .warn{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#FECACA}
+  .setup label{display:block;font-size:13px;opacity:.7;margin:10px 0 4px}
+  .setup input{width:100%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;border-radius:12px;padding:12px;font-size:16px;font-family:inherit}
+  .adv{margin-top:16px}.adv summary{font-size:12px;opacity:.5;cursor:pointer}
+  .setup button{margin-top:14px;width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;color:#fff;background:#3E6AF2;font-family:inherit}
+  .foot{margin-top:auto;font-size:11.5px;opacity:.4;text-align:center;padding-top:10px}
+  .tabs{display:flex;background:rgba(255,255,255,.08);border-radius:14px;padding:4px;margin-bottom:14px}
+  .tabs button{flex:1;border:0;background:transparent;color:#EAF0FF;opacity:.6;font:inherit;font-size:15px;font-weight:700;padding:11px;border-radius:11px}
+  .tabs button.on{background:#3E6AF2;opacity:1}
+  .f label{display:block;font-size:13px;opacity:.7;margin:12px 0 5px}
+  .f input,.f select{width:100%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;border-radius:12px;padding:13px;font-size:18px;font-weight:700;font-family:inherit}
+  .f input.num{text-align:right;font-variant-numeric:tabular-nums}
+  .f .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg2{display:flex;gap:8px}.seg2 button{flex:1;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.2);color:#fff;border-radius:12px;padding:12px;font:inherit;font-size:16px;font-weight:700}
+  .seg2 button.on{background:#fff;color:#0F1A33;border-color:#fff}
+  .hint{font-size:12.5px;opacity:.65;margin-top:6px;line-height:1.5}.hint b{color:#FDE68A}
+  .hist{font-size:14px;line-height:1.7}.hist div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid rgba(255,255,255,.08);padding:6px 0}.hist div:first-child{border-top:0}.hist span:last-child{font-variant-numeric:tabular-nums;font-weight:700}
+  button.sm{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:8px;padding:3px 9px;font:inherit;font-size:12px}
+  details summary{cursor:pointer}
+  .ok{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#BBF7D0}
+  button.big.save{background:linear-gradient(135deg,#3E6AF2,#8B5CF6);box-shadow:0 10px 30px rgba(62,106,242,.35);font-size:20px;padding:18px}
+  .log{font-size:11.5px;opacity:.55;max-height:90px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="brand"><span class="lg">W</span><b>위로드</b><small>배송기사웹</small></div>
+
+<div id="setup" class="card setup" hidden>
+  <div class="name">로그인<small>이름과 휴대폰번호만 넣으면 됩니다</small></div>
+  <label>이름 (위펀오피스에 등록된 기사 이름)</label><input id="s-n" placeholder="홍길동" autocomplete="off">
+  <label>비밀번호 (휴대폰번호, 숫자만)</label><input id="s-p" type="tel" inputmode="numeric" placeholder="01012345678" autocomplete="off">
+  <button id="s-ok">시작하기</button>
+  <p class="msg" style="margin-top:12px">로그인이 안 되면 관리자에게 "위로드 기사 등록"을 요청해 주세요.<br><a href="guide.html" style="color:#9CB4FF;font-weight:700">📖 설치·사용 가이드 보기</a></p>
+</div>
+
+<div id="main" hidden>
+  <div class="tabs"><button data-tab="loc">출근</button><button class="on" data-tab="rec">퇴근 기록</button></div>
+  <div id="t-rec">
+    <div class="card f">
+      <div class="name" id="nm2">—<small>오늘 운행 마치고 적어 주세요</small></div>
+      <label>차량번호</label><select id="r-v"></select>
+      <label>근무</label><div class="seg2"><button data-sh="주간">주간</button><button data-sh="야간">야간</button></div>
+      <label>퇴근 때 계기판 km (누적)</label><input id="r-km" class="num" inputmode="numeric" placeholder="예: 246720">
+      <div class="hint" id="r-hint"></div>
+      <div class="two"><div><label>주유·충전 금액 (원)</label><input id="r-fuel" class="num" inputmode="numeric" placeholder="없으면 비움"></div><div><label>주유 리터 (선택)</label><input id="r-l" class="num" inputmode="decimal" placeholder="예: 45.2"></div></div>
+      <label>특이사항 (선택)</label><input id="r-note" placeholder="경고등, 소음, 사고 등">
+    </div>
+    <button class="big save" id="r-save">퇴근 기록 저장</button>
+    <div class="card ok" id="r-ok" hidden></div>
+    <div class="card warn" id="r-warn" hidden></div>
+    <div class="card"><div class="kv" style="background:none;padding:0"><label>최근 기록</label></div><div class="hist" id="r-hist">—</div></div>
+    <div class="card msg">· 계기판 숫자는 <b>누적 km 전체</b>를 적어요 (예: 246720). 지난 기록보다 작으면 저장이 안 돼요.<br>· 저장이 안 되면 기록은 폰에 남아 있다가 다음에 열 때 다시 보내요.<br>· 주유 영수증은 사진으로 따로 보관해 주세요.<br>· <a href="guide.html" style="color:#9CB4FF">📖 사용 가이드</a></div>
+  </div>
+  <div id="t-loc" hidden>
+  <div class="card">
+    <div class="name" id="nm">—<small id="sub">출근 버튼 한 번이면 돼요 · 위치는 앱이 알아서 보내요</small></div>
+    <div class="st" id="st"><span class="dot"></span><span id="stt">위치 앱 확인 중…</span></div>
+  </div>
+  <div class="card">
+    <div class="grid">
+      <div class="kv"><label>오늘 출근</label><b id="a-in-t">—</b></div>
+      <div class="kv"><label>퇴근</label><b id="a-out-t">—</b></div>
+      <div class="kv"><label>마지막 위치 수신</label><b id="a-last">—</b></div>
+      <div class="kv"><label>위치 앱</label><b id="a-app">—</b></div>
+    </div>
+  </div>
+  <button class="big" id="a-in">출근</button>
+  <div style="text-align:right;margin:-6px 0 10px"><a href="guide.html" style="color:#9CB4FF;font-size:14px;font-weight:700">📖 사용 가이드</a></div>
+  <div class="card ok" id="a-ok" hidden></div>
+  <div class="card warn" id="a-warn" hidden></div>
+  <div class="card msg" id="app-help" hidden>
+    <b>위로드 앱 상태</b>
+    <div style="margin-top:6px;line-height:1.8" id="app-st">—</div>
+    <div style="margin-top:6px">· 출근 버튼을 누르면 위치 전송이 켜지고 상단 알림에 "출근 중"이 떠요. 화면 꺼도, 네비·사진 찍어도 계속 보내요.<br>· 퇴근 기록을 저장하면 자동으로 꺼져요.<br>· 처음엔 위치 권한 <b>"항상 허용"</b>, 알림 허용, 배터리 <b>"제한 없음"</b>을 물어요 — 모두 허용해 주세요.</div>
+    <div style="margin-top:8px"><button class="sm" id="app-batt">배터리 제한 없음 설정</button> <button class="sm" id="app-perm">앱 권한 설정 열기</button></div>
+  </div>
+  <div class="card msg" id="apk-help" hidden>
+    <b>안드로이드 폰이네요 — 위로드 앱을 설치하면 화면을 꺼도 위치가 가요</b>
+    <div style="margin-top:6px;line-height:1.8">1. <a href="weroad.apk" style="color:#9CB4FF;font-weight:700">위로드 앱 내려받기 (weroad.apk)</a><br>2. 내려받은 파일 열기 → "출처를 알 수 없는 앱" 허용 → 설치<br>3. 앱 열고 같은 이름·번호로 로그인 → 출근</div>
+  </div>
+  <details class="card msg" id="tc-help">
+    <summary><b>위치 앱(Traccar Client) 설정 — 아이폰 · 처음 한 번만</b></summary>
+    <div style="margin-top:8px;line-height:1.8">
+      1. 앱 설치: <b>Traccar Client</b> (Play 스토어 · App Store, 무료)<br>
+      2. 기기 식별자(Device identifier): <b id="tc-id">—</b> <button class="sm" data-copy="tc-id">복사</button><br>
+      3. 서버 주소(Server URL): <b id="tc-url" style="word-break:break-all">—</b> <button class="sm" data-copy="tc-url">복사</button><br>
+      4. 위치 정확도 <b>높음</b> · 주기 <b>120</b>초 · 거리 0 · 각도 0<br>
+      5. 맨 위 <b>서비스 상태</b> 켜기 → 이 화면에서 "마지막 위치 수신"이 몇 분 안으로 뜨면 성공<br>
+      · 안드로이드: 앱 정보 → 배터리 → <b>제한 없음</b> (안 하면 밤에 멈춰요)<br>
+      · 아이폰: 설정 → Traccar → 위치 → <b>항상</b><br>
+      · 이후엔 앱을 건드릴 필요 없어요. 화면 꺼도, 네비·사진 찍어도 계속 보내요.
+    </div>
+  </details>
+  <details class="card msg" id="tmp-help">
+    <summary>앱이 아직 없을 때 임시로 — 이 화면에서 보내기</summary>
+    <div style="margin-top:8px">
+      <button class="big" id="btn" style="margin:8px 0">임시 위치 전송 시작</button>
+      <div class="grid">
+        <div class="kv"><label>마지막 전송</label><b id="k-last">—</b></div>
+        <div class="kv"><label>오늘 전송</label><b id="k-n">0<i>회</i></b></div>
+        <div class="kv"><label>GPS 정확도</label><b id="k-acc">—</b></div>
+        <div class="kv"><label>속도</label><b id="k-spd">—</b></div>
+      </div>
+      <div id="help" style="margin-top:8px">· 이 화면을 <b>켜 둔 동안만</b> 보내요. 화면을 끄거나 다른 앱으로 가면 멈춰요 — 그래서 위 앱을 꼭 설치해 주세요.</div>
+    </div>
+  </details>
+  <div class="card msg">· <a href="#" id="logout" style="color:#9CB4FF">다른 이름으로 로그인</a></div>
+  <div class="card warn" id="warn" hidden></div>
+  <div class="log" id="log"></div>
+  </div>
+</div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v12</span></div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const LS = 'wr-driver';
+  const SERVER = 'https://evyxvhqerfuqmzwjhkgz.supabase.co', KEY = 'sb_publishable_DNESzKpu1WcxT9sx15D5fw_jVan14DH';   // 공개용 키 — 위치 쓰기는 로그인 토큰이 있어야 함
+  const SEND_MOVING = 120, SEND_IDLE = 300, REC_SEC = 30, REC_M = 40;   // 전송 주기(초)·기록 간격(초/미터)
+  let cfg = {}; try { cfg = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { cfg = {}; }
+  const q = new URLSearchParams(location.search);
+  // 링크 변수: n=기사이름 (이름만 미리 채움 · 로그인은 본인이)
+  if (q.get('n') || q.get('v')) { if (q.get('n')) cfg.n = q.get('n'); if (q.get('v')) cfg.v = q.get('v'); try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) { /* noop */ } history.replaceState(null, '', location.pathname); }
+  const log = (s) => { const el = $('log'); el.textContent = (new Date().toTimeString().slice(0, 8) + ' ' + s + '\n' + el.textContent).slice(0, 1500); };
+
+  const loggedIn = () => cfg.n && cfg.tok;
+  const TRACCAR_URL = SERVER + '/functions/v1/loc';
+  const APP = !!window.WeRoadApp;   // 위로드 안드로이드 앱 안에서 열렸는지
+  const IS_ANDROID = /Android/i.test(navigator.userAgent);   // Traccar Client 서버 주소 (Supabase Edge Function 'loc')
+  const MASTERS = ['이상진', '김태영'];   // 관리자 계정: 위치 전송 없음(기사·차량으로 세지 않음), 어떤 차든 퇴근 기록 대신 입력 가능
+  const isMaster = () => MASTERS.includes(String(cfg.n || '').replace(/\s/g, ''));
+  if (!loggedIn()) { $('setup').hidden = false; }
+  else { $('main').hidden = false; $('nm').firstChild.textContent = cfg.n; $('nm2').firstChild.textContent = cfg.n; if (isMaster()) { document.querySelector('.tabs button[data-tab=loc]').hidden = true; $('nm2').lastElementChild.textContent = '관리자 계정 — 어떤 차량이든 대신 기록할 수 있어요'; } }
+  $('s-n').value = cfg.n || '';
+  const rpc = async (fn, body) => {
+    const r = await fetch(SERVER + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY }, body: JSON.stringify(body) });
+    const t = await r.text();
+    if (!r.ok) { let m = t; try { m = JSON.parse(t).message || t; } catch (e) { /* noop */ } throw new Error(m.slice(0, 120)); }
+    return t ? JSON.parse(t) : null;
+  };
+  $('s-ok').onclick = async () => {
+    const n = $('s-n').value.trim(), pw = $('s-p').value.replace(/[^0-9]/g, '');
+    if (!n || !pw) return alert('이름과 휴대폰번호를 넣어 주세요');
+    $('s-ok').disabled = true; $('s-ok').textContent = '확인 중…';
+    try {
+      const tok = await rpc('driver_login', { p_name: n, p_pw: pw });
+      if (!tok) throw new Error('이름 또는 휴대폰번호가 맞지 않습니다. 위펀오피스에 등록된 이름·번호인지 확인해 주세요.');
+      cfg = { n, tok, v: cfg.v || '' }; localStorage.setItem(LS, JSON.stringify(cfg)); if (APP) { try { window.WeRoadApp.setDriver(n); } catch (e) { /* noop */ } } location.reload();
+    } catch (e) { $('s-ok').disabled = false; $('s-ok').textContent = '시작하기'; alert(e.message); }
+  };
+  // ---- 상태
+  let on = false, watchId = null, wake = null, buf = [], lastRec = null, lastSent = 0, nToday = 0, sending = false, timer = null, lastPos = null;
+  try { const b = JSON.parse(localStorage.getItem(LS + '-buf') || '[]'); if (Array.isArray(b)) buf = b.slice(-300); } catch (e) { /* noop */ }
+  try { const c = JSON.parse(localStorage.getItem(LS + '-cnt') || '{}'); if (c.d === today()) nToday = c.n || 0; } catch (e) { /* noop */ }
+  function today() { return new Date().toLocaleDateString('sv-SE'); }
+  function saveBuf() { try { localStorage.setItem(LS + '-buf', JSON.stringify(buf.slice(-300))); } catch (e) { /* noop */ } }
+  function dist(a, b) { return Math.hypot((a.lng - b.lng) * 88400, (a.lat - b.lat) * 111000); }
+  function ui() {
+    const st = $('st'); st.className = 'st ' + (on ? 'on' : '');
+    if (on) $('stt').textContent = sending ? '임시 전송 중…' : '임시 전송 중 (화면 켜 둔 동안)';
+    
+    const b = $('btn'); b.textContent = on ? '임시 위치 전송 멈춤' : '임시 위치 전송 시작'; b.className = 'big' + (on ? ' stop' : '');
+    $('k-n').innerHTML = nToday + '<i>회</i>';
+    $('k-last').textContent = lastSent ? new Date(lastSent).toTimeString().slice(0, 5) : '—';
+    $('k-acc').innerHTML = lastPos ? Math.round(lastPos.acc) + '<i>m</i>' : '—';
+    $('k-spd').innerHTML = lastPos && lastPos.spd != null ? Math.round(lastPos.spd) + '<i>km/h</i>' : '—';
+  }
+  function warn(s) { const w = $('warn'); w.hidden = !s; w.textContent = s || ''; }
+
+  // ---- 위치 수집
+  function onPos(p) {
+    const c = p.coords, t = p.timestamp || Date.now();
+    lastPos = { lat: c.latitude, lng: c.longitude, acc: c.accuracy || 0, spd: c.speed != null && c.speed >= 0 ? c.speed * 3.6 : null, t };
+    if (c.accuracy > 300) { ui(); return; }                      // 너무 부정확한 점은 버림
+    const moved = !lastRec || dist(lastRec, lastPos) >= REC_M;
+    const due = !lastRec || t - lastRec.t >= REC_SEC * 1000;
+    if (moved && due) { lastRec = lastPos; buf.push([t, +c.latitude.toFixed(6), +c.longitude.toFixed(6), Math.round(c.accuracy || 0), Math.round(lastPos.spd || 0)]); saveBuf(); }
+    warn('');
+    ui();
+  }
+  function onErr(e) {
+    warn(e.code === 1 ? '위치 권한이 꺼져 있습니다. 브라우저 설정에서 이 사이트의 위치 권한을 "허용"으로 바꿔 주세요.' : '위치를 가져오지 못했습니다 (' + e.message + '). 잠시 후 다시 시도합니다.');
+    log('GPS 오류 ' + e.code + ' ' + e.message);
+  }
+  const rows = (pts) => pts.map((p) => ({ t: new Date(p[0]).toISOString(), lat: p[1], lng: p[2], acc: p[3], spd: p[4], vehicle: cfg.v || null }));
+  // 서버로 보내기 (로그인 토큰 확인) — 토큰이 죽었으면 로그인 화면으로
+  async function send(pts) {
+    try { await rpc('push_locations', { p_name: cfg.n, p_token: cfg.tok, p_rows: rows(pts) }); }
+    catch (e) { if (/로그인/.test(e.message)) { stop(); cfg = { n: cfg.n, v: cfg.v }; localStorage.setItem(LS, JSON.stringify(cfg)); alert('다시 로그인해 주세요'); location.reload(); } throw e; }
+  }
+  async function flush(force) {
+    if (!on || sending) return;
+    const idle = lastPos && (lastPos.spd || 0) < 3;
+    const every = (idle ? SEND_IDLE : SEND_MOVING) * 1000;
+    if (!force && Date.now() - lastSent < every) return;
+    let pts = buf.slice();
+    if (!pts.length) { if (!lastPos) return; pts = [[Date.now(), +lastPos.lat.toFixed(6), +lastPos.lng.toFixed(6), Math.round(lastPos.acc), Math.round(lastPos.spd || 0)]]; }  // 안 움직여도 살아있음 알림
+    sending = true; ui();
+    try {
+      await send(pts.slice(-200));
+      buf = buf.filter((p) => !pts.includes(p)); saveBuf();
+      lastSent = Date.now(); nToday++;
+      try { localStorage.setItem(LS + '-cnt', JSON.stringify({ d: today(), n: nToday })); } catch (e) { /* noop */ }
+      warn('');
+      log('전송 ' + pts.length + '점');
+    } catch (e) {
+      warn('서버로 보내지 못했습니다 (' + e.message + '). 위치는 저장해 두었다가 다음에 함께 보냅니다.');
+      log('전송 실패 ' + e.message);
+    }
+    sending = false; ui();
+  }
+  async function keepAwake() {
+    try { if ('wakeLock' in navigator && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch (e) { /* 미지원 */ }
+  }
+  function start() {
+    if (!navigator.geolocation) return warn('이 브라우저는 위치 기능을 지원하지 않습니다.');
+    on = true; ui(); keepAwake();
+    watchId = navigator.geolocation.watchPosition(onPos, onErr, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
+    timer = setInterval(() => flush(false), 15000);
+    setTimeout(() => flush(true), 8000);          // 시작 직후 한 번
+    try { localStorage.setItem(LS + '-on', '1'); } catch (e) { /* noop */ }
+    log('시작');
+  }
+  function stop() {
+    on = false; ui();
+    if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null;
+    clearInterval(timer); timer = null;
+    if (wake) { try { wake.release(); } catch (e) { /* noop */ } wake = null; }
+    try { localStorage.setItem(LS + '-on', '0'); } catch (e) { /* noop */ }
+    log('중지');
+  }
+  $('btn').onclick = () => (on ? stop() : start());
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && on) { keepAwake(); flush(true); } });
+  window.addEventListener('pagehide', () => { if (on && buf.length) { try { fetch(SERVER + '/rest/v1/rpc/push_locations', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: KEY }, body: JSON.stringify({ p_name: cfg.n, p_token: cfg.tok, p_rows: rows(buf.slice(-200)) }) }); } catch (e) { /* noop */ } } });
+  const _lo = $('logout'); if (APP) _lo.addEventListener('click', () => { try { window.WeRoadApp.stop(); } catch (e) { /* noop */ } });
+  $('logout').onclick = (e) => { e.preventDefault(); if (on) stop(); localStorage.removeItem(LS); localStorage.removeItem(LS + '-on'); location.reload(); };
+  ui();
+  // 지난번에 켜 둔 상태로 닫혔으면 다시 열 때 자동 시작
+  if (!$('main').hidden && !isMaster() && localStorage.getItem(LS + '-on') === '1') start();
+
+  // ---- 퇴근 기록 (v5): 계기판 km · 주유비 → 서버 함수 push_trip_log(로그인 토큰 확인) → trip_logs. 위로드 차량관리가 읽음
+  const R = { shift: new Date().getHours() < 12 ? '야간' : '주간', hist: [], pend: [], mine: [], all: [] };   // 오전 퇴근 = 야간 근무
+  try { Object.assign(R, JSON.parse(localStorage.getItem(LS + '-veh') || '{}')); } catch (e) { /* noop */ }
+  try { R.pend = JSON.parse(localStorage.getItem(LS + '-pend') || '[]'); } catch (e) { R.pend = []; }
+  try { R.hist = JSON.parse(localStorage.getItem(LS + '-hist') || '[]'); } catch (e) { R.hist = []; }
+  const vlist = () => String(cfg.v || '').split(/[,\s]+/).map((x) => x.trim()).filter(Boolean);
+  const won = (n) => Number(n || 0).toLocaleString('ko-KR');
+  document.querySelectorAll('.tabs button').forEach((b) => { b.onclick = () => { document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); $('t-rec').hidden = b.dataset.tab !== 'rec'; $('t-loc').hidden = b.dataset.tab !== 'loc'; }; });
+  if (!isMaster() && (localStorage.getItem(LS + '-on') === '1' || new Date().getHours() < 14)) document.querySelector('.tabs button[data-tab=loc]').click();
+  function rUi() {
+    const sel = $('r-v'), cur = sel.value;
+    const mine = (R.mine || []).map((m) => m.plate), extra = vlist().filter((v) => !mine.includes(v));
+    const rest = (R.all || []).filter((v) => !mine.includes(v) && !extra.includes(v));
+    sel.innerHTML = (mine.length ? `<optgroup label="내 차량 (위로드 차량관리 기준)">${(R.mine || []).map((m) => `<option value="${m.plate}">${m.plate} · ${m.shift}</option>`).join('')}</optgroup>` : '')
+      + (extra.length ? `<optgroup label="최근 쓴 차량">${extra.map((v) => `<option>${v}</option>`).join('')}</optgroup>` : '')
+      + (rest.length ? `<optgroup label="다른 차량">${rest.map((v) => `<option>${v}</option>`).join('')}</optgroup>` : '')
+      + '<option value="__other">' + (mine.length || extra.length || rest.length ? '목록에 없는 차량 (직접 입력)' : '차량번호 넣기…') + '</option>';
+    if (cur && [...sel.options].some((o) => o.value === cur)) sel.value = cur;
+    else if (mine.length) { const pick = (R.mine || []).find((m) => m.shift === R.shift) || R.mine[0]; sel.value = pick.plate; }
+    document.querySelectorAll('.seg2 button').forEach((b) => b.classList.toggle('on', b.dataset.sh === R.shift));
+    const last = R.hist.find((h) => h.vehicle === sel.value);
+    $('r-hint').innerHTML = !mine.length && !rest.length ? '위로드 차량관리에 차량·탑승자가 아직 없어요. 관리자에게 알려 주시거나 직접 입력하세요.' : last ? `지난 기록 <b>${won(last.odo_km)} km</b> (${String(last.date).slice(5)} ${last.shift})` : (sel.value && sel.value !== '__other' ? '이 차 첫 기록이에요' : '');
+    $('r-hist').innerHTML = R.hist.slice(0, 7).map((h) => `<div><span>${String(h.date).slice(5).replace('-', '/')} ${h.shift} · ${h.vehicle}${h.fuel_won ? ' · 주유 ' + won(h.fuel_won) + '원' : ''}${h.sent === false ? ' <i style="opacity:.6">(전송 대기)</i>' : ''}</span><span>${won(h.odo_km)} km</span></div>`).join('') || '—';
+  }
+  document.querySelectorAll('.seg2 button').forEach((b) => { b.onclick = () => { R.shift = b.dataset.sh; rUi(); }; });
+  $('r-v').onchange = () => { const m = (R.mine || []).find((x) => x.plate === $('r-v').value); if (m) R.shift = m.shift; if ($('r-v').value === '__other') { const v = prompt('차량번호를 넣어 주세요 (예: 83수1306)'); if (v && v.trim()) { cfg.v = [...vlist(), v.trim().replace(/\s+/g, '')].join(', '); localStorage.setItem(LS, JSON.stringify(cfg)); rUi(); $('r-v').value = v.trim().replace(/\s+/g, ''); } else rUi(); } rUi(); };
+  async function rLoadVeh() {
+    if (!loggedIn()) return;
+    try { const r = await rpc('my_vehicles', { p_name: cfg.n, p_token: cfg.tok }); if (r && Array.isArray(r.mine)) { R.mine = r.mine; R.all = r.all || []; localStorage.setItem(LS + '-veh', JSON.stringify({ mine: R.mine, all: R.all })); if (R.mine.length) { const pick = R.mine.find((m) => m.shift === R.shift) || R.mine[0]; R.shift = pick.shift; $('r-v').value = ''; } rUi(); } }
+    catch (e) { log('차량 목록 불러오기 실패 ' + e.message); }
+  }
+  async function rLoadHist() {
+    if (!loggedIn()) return;
+    try { const rows = await rpc('my_trip_logs', { p_name: cfg.n, p_token: cfg.tok, p_limit: 20 }); if (Array.isArray(rows)) { const pendKeys = new Set(R.pend.map((x) => x.date + x.shift + x.vehicle)); R.hist = rows.map((h) => ({ ...h, sent: !pendKeys.has(h.date + h.shift + h.vehicle) })); R.pend.forEach((x) => { if (!R.hist.some((h) => h.date === x.date && h.shift === x.shift && h.vehicle === x.vehicle)) R.hist.unshift({ ...x, sent: false }); }); const vs = new Set(vlist()); rows.forEach((h) => vs.add(h.vehicle)); if (vs.size && !cfg.v) { cfg.v = [...vs].join(', '); localStorage.setItem(LS, JSON.stringify(cfg)); } localStorage.setItem(LS + '-hist', JSON.stringify(R.hist)); rUi(); } }
+    catch (e) { log('기록 불러오기 실패 ' + e.message); }
+  }
+  async function rFlush() {
+    if (!R.pend.length || !loggedIn()) return;
+    const rest = [];
+    for (const row of R.pend) { try { await rpc('push_trip_log', { p_name: cfg.n, p_token: cfg.tok, p_row: row }); const h = R.hist.find((x) => x.date === row.date && x.shift === row.shift && x.vehicle === row.vehicle); if (h) h.sent = true; } catch (e) { if (/로그인/.test(e.message)) { localStorage.setItem(LS + '-pend', JSON.stringify(R.pend)); alert('다시 로그인해 주세요'); cfg = { n: cfg.n, v: cfg.v }; localStorage.setItem(LS, JSON.stringify(cfg)); location.reload(); return; } rest.push(row); log('퇴근 기록 전송 실패 ' + e.message); } }
+    R.pend = rest; localStorage.setItem(LS + '-pend', JSON.stringify(R.pend)); localStorage.setItem(LS + '-hist', JSON.stringify(R.hist)); rUi();
+  }
+  $('r-save').onclick = async () => {
+    const vehicle = $('r-v').value, km = Number(String($('r-km').value).replace(/[^\d]/g, '')), fuel = Number(String($('r-fuel').value).replace(/[^\d]/g, '')) || null, l = parseFloat($('r-l').value) || null, note = $('r-note').value.trim();
+    const w = $('r-warn'), ok = $('r-ok'); w.hidden = true; ok.hidden = true;
+    if (!vehicle || vehicle === '__other') { w.hidden = false; w.textContent = '차량번호를 골라 주세요.'; return; }
+    if (!km || km < 1000) { w.hidden = false; w.textContent = '계기판 누적 km를 넣어 주세요 (예: 246720).'; return; }
+    const last = R.hist.find((h) => h.vehicle === vehicle);
+    if (last && km < Number(last.odo_km)) { w.hidden = false; w.textContent = `지난 기록(${won(last.odo_km)} km)보다 작아요. 숫자를 다시 확인해 주세요.`; return; }
+    if (last && km - Number(last.odo_km) > 1500 && !confirm(`지난 기록보다 ${won(km - Number(last.odo_km))} km 많아요. 맞나요?`)) return;
+    const row = { date: today(), shift: R.shift, vehicle, odo_km: km, fuel_won: fuel, fuel_l: l, note: note || null, at: new Date().toISOString() };
+    R.hist = [{ ...row, driver: cfg.n, sent: false }, ...R.hist.filter((h) => !(h.date === row.date && h.shift === row.shift && h.vehicle === row.vehicle))].slice(0, 60);
+    R.pend = [row, ...R.pend.filter((x) => !(x.date === row.date && x.shift === row.shift && x.vehicle === row.vehicle))];
+    localStorage.setItem(LS + '-pend', JSON.stringify(R.pend)); localStorage.setItem(LS + '-hist', JSON.stringify(R.hist));
+    $('r-save').disabled = true; $('r-save').textContent = '보내는 중…';
+    await rFlush();
+    $('r-save').disabled = false; $('r-save').textContent = '퇴근 기록 저장';
+    rUi();
+    if (R.pend.length) { w.hidden = false; w.textContent = '지금은 서버에 못 보냈어요. 기록은 폰에 저장됐고, 다음에 이 화면을 열면 자동으로 보내요.'; }
+    else { punch('out').then(aUi).catch(() => { /* noop */ }); if (APP) { try { window.WeRoadApp.stop(); } catch (e) { /* noop */ } } ok.hidden = false; ok.innerHTML = `<b>저장됐어요.</b> ${row.date.slice(5).replace('-', '/')} ${row.shift} · ${vehicle} · ${won(km)} km${fuel ? ' · 주유 ' + won(fuel) + '원' : ''}`; $('r-km').value = ''; $('r-fuel').value = ''; $('r-l').value = ''; $('r-note').value = ''; }
+  };
+  if (!$('main').hidden) { rUi(); rLoadVeh(); rFlush().then(rLoadHist); }
+  // ---- 출근 체크 + 위치 앱(Traccar) 수신 확인 (v9)
+  const A = { st: null };
+  const hm = (x) => x ? new Date(x).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '—';
+  function aUi() {
+    const st = A.st || {}, att = st.att || {};
+    $('a-in-t').textContent = hm(att.in_at); $('a-out-t').textContent = hm(att.out_at);
+    const age = st.last_age_min;
+    $('a-last').textContent = age == null ? '없음' : age < 1 ? '방금' : age < 60 ? age + '분 전' : age < 1440 ? Math.floor(age / 60) + '시간 전' : Math.floor(age / 1440) + '일 전';
+    const good = age != null && age <= 10;
+    $('a-app').textContent = good ? '정상' : age == null ? '미설정' : '끊김';
+    $('a-app').style.color = good ? '#86EFAC' : '#FDE68A';
+    $('stt').textContent = good ? '위치 앱 정상 수신 중' : age == null ? '위치 앱 설정이 필요해요 (아래 안내)' : '위치가 ' + $('a-last').textContent + ' 이후 안 와요 — 앱 켜져 있는지 확인';
+    $('st').classList.toggle('on', good);
+    $('a-in').textContent = att.in_at ? '출근 완료 ' + hm(att.in_at) + ' · 다시 누르면 시각 유지' : '출근';
+    $('tmp-help').hidden = APP; $('tc-help').hidden = APP || IS_ANDROID; $('app-help').hidden = !APP; $('apk-help').hidden = APP || !IS_ANDROID;
+    if (!good && !APP && !IS_ANDROID) $('tc-help').open = true;
+    $('tc-id').textContent = cfg.n || '—'; $('tc-url').textContent = TRACCAR_URL;
+    if (APP) {
+      const a = A.app || {};
+      $('a-app').textContent = a.running ? (good ? '정상' : '켜짐 · ' + (a.status || '')) : '꺼짐 (출근 전)';
+      $('a-app').style.color = a.running && good ? '#86EFAC' : a.running ? '#FDE68A' : '#EAF0FF';
+      $('stt').textContent = a.running ? '출근 중 · 위로드 앱이 위치 전송 중' + (good ? '' : ' (' + (a.status || '대기') + ')') : '출근 버튼을 누르면 위치 전송이 시작돼요';
+      $('st').classList.toggle('on', !!a.running);
+      $('app-st').innerHTML = `위치 서비스: <b>${a.running ? '켜짐' : '꺼짐'}</b> · ${a.status || ''}<br>권한: 위치 ${a.fine ? '✓' : '✗'} · 항상 허용 ${a.bg ? '✓' : '<b style="color:#FDE68A">✗ 설정 필요</b>'} · 배터리 제한 없음 ${a.battOk ? '✓' : '<b style="color:#FDE68A">✗</b>'}`;
+    }
+  }
+  window.onWeRoadApp = (st) => { A.app = st || {}; aUi(); };
+  if (APP) { try { A.app = JSON.parse(window.WeRoadApp.status() || '{}'); if (cfg.n && A.app.driver !== cfg.n) window.WeRoadApp.setDriver(cfg.n); if (loggedIn() && (!A.app.fine || !A.app.bg) && !sessionStorage.getItem('wr-prep')) { sessionStorage.setItem('wr-prep', '1'); if (window.WeRoadApp.prepare) setTimeout(() => window.WeRoadApp.prepare(), 600); } } catch (e) { /* noop */ } }
+  $('app-batt').onclick = () => { try { window.WeRoadApp.battery(); } catch (e) { /* noop */ } };
+  $('app-perm').onclick = () => { try { window.WeRoadApp.openSettings(); } catch (e) { /* noop */ } };
+  async function aLoad() { if (!loggedIn()) return; try { A.st = await rpc('my_status', { p_name: cfg.n, p_token: cfg.tok }); aUi(); } catch (e) { log('출근 상태 조회 실패 ' + e.message); } }
+  async function punch(kind) { try { const r = await rpc('punch', { p_name: cfg.n, p_token: cfg.tok, p_kind: kind }); A.st = { ...(A.st || {}), att: r }; return r; } catch (e) { if (/로그인/.test(e.message)) { alert('다시 로그인해 주세요'); cfg = { n: cfg.n, v: cfg.v }; localStorage.setItem(LS, JSON.stringify(cfg)); location.reload(); } throw e; } }
+  $('a-in').onclick = async () => {
+    const ok = $('a-ok'), w = $('a-warn'); ok.hidden = true; w.hidden = true; $('a-in').disabled = true;
+    if (APP) { try { window.WeRoadApp.setDriver(cfg.n); window.WeRoadApp.start(); } catch (e) { /* noop */ } }
+    try { const r = await punch('in'); await aLoad(); if (r && r.in_at) A.st = { ...(A.st || {}), att: r }; ok.hidden = false; ok.innerHTML = `<b>출근 ${hm((A.st.att || {}).in_at)}</b> — 수고하세요!` + ((A.st.last_age_min != null && A.st.last_age_min <= 10) ? '' : '<br>위치 앱이 아직 안 보내고 있어요. 아래 안내대로 켜 주세요.'); }
+    catch (e) { w.hidden = false; w.textContent = '출근 체크 실패: ' + e.message; }
+    $('a-in').disabled = false; aUi();
+  };
+  document.querySelectorAll('button[data-copy]').forEach((b) => { b.onclick = async () => { const t = $(b.dataset.copy).textContent; try { await navigator.clipboard.writeText(t); b.textContent = '복사됨'; setTimeout(() => { b.textContent = '복사'; }, 1500); } catch (e) { prompt('복사해 주세요', t); } }; });
+  if (!$('main').hidden) { aUi(); aLoad(); }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { rFlush(); aLoad(); } });
+})();
+</script>
+</body>
+</html>

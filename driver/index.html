@@ -78,9 +78,9 @@
       <div class="name" id="nm2">—<small>오늘 운행 마치고 적어 주세요</small></div>
       <label>차량번호</label><select id="r-v"></select>
       <label>근무</label><div class="seg2"><button data-sh="주간">주간</button><button data-sh="야간">야간</button></div>
-      <label>퇴근 때 계기판 km (누적)</label><input id="r-km" class="num" inputmode="numeric" placeholder="예: 246720">
+      <label>퇴근 때 계기판 km (누적)</label><input id="r-km" class="num" inputmode="numeric" placeholder="예: 246,720">
       <div class="hint" id="r-hint"></div>
-      <div class="two"><div><label>주유·충전 금액 (원)</label><input id="r-fuel" class="num" inputmode="numeric" placeholder="없으면 비움"></div><div><label>주유 리터 (선택)</label><input id="r-l" class="num" inputmode="decimal" placeholder="예: 45.2"></div></div>
+      <label>주유·충전 금액 (원)</label><input id="r-fuel" class="num" inputmode="numeric" placeholder="없으면 비움">
       <label>특이사항 (선택)</label><input id="r-note" placeholder="경고등, 소음, 사고 등">
     </div>
     <button class="big save" id="r-save">퇴근 기록 저장</button>
@@ -147,7 +147,7 @@
   <div class="log" id="log"></div>
   </div>
 </div>
-<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v13</span></div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v14</span></div>
 
 <script>
 (function () {
@@ -328,7 +328,7 @@
     R.pend = rest; localStorage.setItem(LS + '-pend', JSON.stringify(R.pend)); localStorage.setItem(LS + '-hist', JSON.stringify(R.hist)); rUi();
   }
   $('r-save').onclick = async () => {
-    const vehicle = $('r-v').value, km = Number(String($('r-km').value).replace(/[^\d]/g, '')), fuel = Number(String($('r-fuel').value).replace(/[^\d]/g, '')) || null, l = parseFloat($('r-l').value) || null, note = $('r-note').value.trim();
+    const vehicle = $('r-v').value, km = Number(String($('r-km').value).replace(/[^\d]/g, '')), fuel = Number(String($('r-fuel').value).replace(/[^\d]/g, '')) || null, l = null, note = $('r-note').value.trim();
     const w = $('r-warn'), ok = $('r-ok'); w.hidden = true; ok.hidden = true;
     if (!vehicle || vehicle === '__other') { w.hidden = false; w.textContent = '차량번호를 골라 주세요.'; return; }
     if (!km || km < 1000) { w.hidden = false; w.textContent = '계기판 누적 km를 넣어 주세요 (예: 246720).'; return; }
@@ -344,8 +344,10 @@
     $('r-save').disabled = false; $('r-save').textContent = '퇴근 기록 저장';
     rUi();
     if (R.pend.length) { w.hidden = false; w.textContent = '지금은 서버에 못 보냈어요. 기록은 폰에 저장됐고, 다음에 이 화면을 열면 자동으로 보내요.'; }
-    else { punch('out').then(aUi).catch(() => { /* noop */ }); if (APP) { try { window.WeRoadApp.stop(); } catch (e) { /* noop */ } } ok.hidden = false; ok.innerHTML = `<b>저장됐어요.</b> ${row.date.slice(5).replace('-', '/')} ${row.shift} · ${vehicle} · ${won(km)} km${fuel ? ' · 주유 ' + won(fuel) + '원' : ''}`; $('r-km').value = ''; $('r-fuel').value = ''; $('r-l').value = ''; $('r-note').value = ''; }
+    else { punch('out').then(aUi).catch(() => { /* noop */ }); if (APP) { try { window.WeRoadApp.stop(); } catch (e) { /* noop */ } } ok.hidden = false; ok.innerHTML = `<b>저장됐어요.</b> ${row.date.slice(5).replace('-', '/')} ${row.shift} · ${vehicle} · ${won(km)} km${fuel ? ' · 주유 ' + won(fuel) + '원' : ''}`; $('r-km').value = ''; $('r-fuel').value = ''; $('r-note').value = ''; }
   };
+  // 10/30: 계기판 km·주유 금액은 입력하면서 1,234,567 처럼 쉼표 표시 (저장할 때는 숫자만)
+  ['r-km', 'r-fuel'].forEach((id) => { const el = $(id); el.addEventListener('input', () => { const d = el.value.replace(/[^\d]/g, ''); el.value = d ? Number(d).toLocaleString('ko-KR') : ''; }); });
   if (!$('main').hidden) { rUi(); rLoadVeh(); rFlush().then(rLoadHist); }
   // ---- 출근 체크 + 위치 앱(Traccar) 수신 확인 (v9)
   const A = { st: null };

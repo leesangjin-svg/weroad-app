@@ -147,7 +147,7 @@
   <div class="log" id="log"></div>
   </div>
 </div>
-<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v12</span></div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v13</span></div>
 
 <script>
 (function () {
@@ -305,8 +305,16 @@
   $('r-v').onchange = () => { const m = (R.mine || []).find((x) => x.plate === $('r-v').value); if (m) R.shift = m.shift; if ($('r-v').value === '__other') { const v = prompt('차량번호를 넣어 주세요 (예: 83수1306)'); if (v && v.trim()) { cfg.v = [...vlist(), v.trim().replace(/\s+/g, '')].join(', '); localStorage.setItem(LS, JSON.stringify(cfg)); rUi(); $('r-v').value = v.trim().replace(/\s+/g, ''); } else rUi(); } rUi(); };
   async function rLoadVeh() {
     if (!loggedIn()) return;
-    try { const r = await rpc('my_vehicles', { p_name: cfg.n, p_token: cfg.tok }); if (r && Array.isArray(r.mine)) { R.mine = r.mine; R.all = r.all || []; localStorage.setItem(LS + '-veh', JSON.stringify({ mine: R.mine, all: R.all })); if (R.mine.length) { const pick = R.mine.find((m) => m.shift === R.shift) || R.mine[0]; R.shift = pick.shift; $('r-v').value = ''; } rUi(); } }
-    catch (e) { log('차량 목록 불러오기 실패 ' + e.message); }
+    R.vehErr = '';
+    try { const r = await rpc('my_vehicles', { p_name: cfg.n, p_token: cfg.tok }); if (r && Array.isArray(r.mine)) { R.mine = r.mine; R.all = r.all || []; localStorage.setItem(LS + '-veh', JSON.stringify({ mine: R.mine, all: R.all })); if (R.mine.length) { const pick = R.mine.find((m) => m.shift === R.shift) || R.mine[0]; R.shift = pick.shift; $('r-v').value = ''; } } }
+    catch (e) { R.vehErr = e.message; log('차량 목록 불러오기 실패 ' + e.message); }
+    // 10/30: 내 차 목록을 못 받았거나 관리자 계정이면 → 위펀 전체 차량(번호만)을 따로 받아서 모두 고를 수 있게
+    if (R.vehErr || isMaster() || !(R.all || []).length) {
+      try { const ps = await rpc('shop_plates', {}); const all = (ps || []).map((x) => x.plate).filter(Boolean); if (all.length) { R.all = [...new Set([...(R.all || []), ...all])].sort(); localStorage.setItem(LS + '-veh', JSON.stringify({ mine: R.mine || [], all: R.all })); } }
+      catch (e) { log('전체 차량 목록 실패 ' + e.message); }
+    }
+    rUi();
+    if (R.vehErr && /로그인/.test(R.vehErr)) $('r-hint').innerHTML = '로그인이 만료됐어요. 맨 아래 <b>다른 이름으로 로그인</b>을 눌러 다시 로그인하면 내 차량이 자동으로 잡혀요. (지금도 목록에서 골라 기록할 수 있어요)';
   }
   async function rLoadHist() {
     if (!loggedIn()) return;

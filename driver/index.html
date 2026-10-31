@@ -105,7 +105,7 @@
   <div id="t-dl" hidden>
     <div class="dl-bar"><span>배송매니저 (출발·도착·배송사진 → 위펀오피스)</span><a href="https://delivery-manager.wefun.kr/" target="_blank" rel="noopener">새 창 ↗</a></div>
     <div class="dlw" id="dl-w"></div>
-    <div class="card msg" id="dl-app" hidden style="margin-top:10px">· 사진 첨부가 안 되면 위로드 앱을 새 버전으로 업데이트해 주세요: <a href="https://evyxvhqerfuqmzwjhkgz.supabase.co/storage/v1/object/public/notify/app/weroad.apk" style="color:#9CB4FF;font-weight:700">위로드 앱 v1.3 내려받기</a></div>
+    <div class="card msg" id="dl-app" hidden style="margin-top:10px">· 사진 첨부가 안 되면 위로드 앱을 새 버전으로 업데이트해 주세요: <a href="https://evyxvhqerfuqmzwjhkgz.supabase.co/storage/v1/object/public/notify/app/weroad.apk" style="color:#9CB4FF;font-weight:700">위로드 앱 최신 버전 내려받기</a></div>
   </div>
   <div id="t-lc" hidden>
     <div class="card">
@@ -169,7 +169,7 @@
       1. 앱 설치: <b>Traccar Client</b> (Play 스토어 · App Store, 무료)<br>
       2. 기기 식별자(Device identifier): <b id="tc-id">—</b> <button class="sm" data-copy="tc-id">복사</button><br>
       3. 서버 주소(Server URL): <b id="tc-url" style="word-break:break-all">—</b> <button class="sm" data-copy="tc-url">복사</button><br>
-      4. 위치 정확도 <b>높음</b> · 주기 <b>120</b>초 · 거리 0 · 각도 0<br>
+      4. 위치 정확도 <b>높음</b> · 주기 <b>60</b>초 · 거리 <b>100</b> · 각도 0<br>
       5. 맨 위 <b>서비스 상태</b> 켜기 → 이 화면에서 "마지막 위치 수신"이 몇 분 안으로 뜨면 성공<br>
       · 안드로이드: 앱 정보 → 배터리 → <b>제한 없음</b> (안 하면 밤에 멈춰요)<br>
       · 아이폰: 설정 → Traccar → 위치 → <b>항상</b><br>
@@ -194,7 +194,7 @@
   <div class="log" id="log"></div>
   </div>
 </div>
-<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v16</span></div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v17</span></div>
 
 <script>
 (function () {
@@ -231,7 +231,7 @@
     try {
       const tok = await rpc('driver_login', { p_name: n, p_pw: pw });
       if (!tok) throw new Error('이름 또는 휴대폰번호가 맞지 않습니다. 위펀오피스에 등록된 이름·번호인지 확인해 주세요.');
-      cfg = { n, tok, v: cfg.v || '' }; localStorage.setItem(LS, JSON.stringify(cfg)); if (APP) { try { window.WeRoadApp.setDriver(n); } catch (e) { /* noop */ } } location.reload();
+      cfg = { n, tok, v: cfg.v || '' }; localStorage.setItem(LS, JSON.stringify(cfg)); if (APP) { try { if (window.WeRoadApp.setAuth) window.WeRoadApp.setAuth(n, tok); else window.WeRoadApp.setDriver(n); } catch (e) { /* noop */ } } location.reload();
     } catch (e) { $('s-ok').disabled = false; $('s-ok').textContent = '시작하기'; alert(e.message); }
   };
   // ---- 상태
@@ -444,14 +444,14 @@
     }
   }
   window.onWeRoadApp = (st) => { A.app = st || {}; aUi(); };
-  if (APP) { try { A.app = JSON.parse(window.WeRoadApp.status() || '{}'); if (cfg.n && A.app.driver !== cfg.n) window.WeRoadApp.setDriver(cfg.n); if (loggedIn() && (!A.app.fine || !A.app.bg) && !sessionStorage.getItem('wr-prep')) { sessionStorage.setItem('wr-prep', '1'); if (window.WeRoadApp.prepare) setTimeout(() => window.WeRoadApp.prepare(), 600); } } catch (e) { /* noop */ } }
+  if (APP) { try { A.app = JSON.parse(window.WeRoadApp.status() || '{}'); if (cfg.n && window.WeRoadApp.setAuth && cfg.tok) window.WeRoadApp.setAuth(cfg.n, cfg.tok); else if (cfg.n && A.app.driver !== cfg.n) window.WeRoadApp.setDriver(cfg.n); if (loggedIn() && (!A.app.fine || !A.app.bg) && !sessionStorage.getItem('wr-prep')) { sessionStorage.setItem('wr-prep', '1'); if (window.WeRoadApp.prepare) setTimeout(() => window.WeRoadApp.prepare(), 600); } } catch (e) { /* noop */ } }
   $('app-batt').onclick = () => { try { window.WeRoadApp.battery(); } catch (e) { /* noop */ } };
   $('app-perm').onclick = () => { try { window.WeRoadApp.openSettings(); } catch (e) { /* noop */ } };
   async function aLoad() { if (!loggedIn()) return; try { A.st = await rpc('my_status', { p_name: cfg.n, p_token: cfg.tok }); aUi(); } catch (e) { log('출근 상태 조회 실패 ' + e.message); } }
   async function punch(kind) { try { const r = await rpc('punch', { p_name: cfg.n, p_token: cfg.tok, p_kind: kind }); A.st = { ...(A.st || {}), att: r }; return r; } catch (e) { if (/로그인/.test(e.message)) { alert('다시 로그인해 주세요'); cfg = { n: cfg.n, v: cfg.v }; localStorage.setItem(LS, JSON.stringify(cfg)); location.reload(); } throw e; } }
   $('a-in').onclick = async () => {
     const ok = $('a-ok'), w = $('a-warn'); ok.hidden = true; w.hidden = true; $('a-in').disabled = true;
-    if (APP) { try { window.WeRoadApp.setDriver(cfg.n); window.WeRoadApp.start(); } catch (e) { /* noop */ } }
+    if (APP) { try { if (window.WeRoadApp.setAuth && cfg.tok) window.WeRoadApp.setAuth(cfg.n, cfg.tok); else window.WeRoadApp.setDriver(cfg.n); window.WeRoadApp.start(); } catch (e) { /* noop */ } }
     try { const r = await punch('in'); await aLoad(); if (r && r.in_at) A.st = { ...(A.st || {}), att: r }; ok.hidden = false; ok.innerHTML = `<b>출근 ${hm((A.st.att || {}).in_at)}</b> — 수고하세요!` + ((A.st.last_age_min != null && A.st.last_age_min <= 10) ? '' : '<br>위치 앱이 아직 안 보내고 있어요. 아래 안내대로 켜 주세요.'); }
     catch (e) { w.hidden = false; w.textContent = '출근 체크 실패: ' + e.message; }
     $('a-in').disabled = false; aUi();
@@ -493,11 +493,11 @@
       return `<div class="lc ${done && (r.needA || r.needC) ? 'done' : ''}"><div class="lc-h"><span class="sq">${r.seq != null ? esc(r.seq) : '·'}</span><b>${esc(r.name)}</b>${multi ? `<span class="lc-tg" style="background:#334155;color:#E2E8F0">${esc(String(r.course || '').replace(/^스\)/, ''))}</span>` : ''}${r.frozen ? '<span class="lc-tg fz">냉동</span>' : ''}${r.ice ? '<span class="lc-tg ic">얼음</span>' : ''}</div>${row(r, 'a')}${row(r, 'c')}${r.note ? `<div class="lc-nt">📝 ${esc(r.note)}</div>` : ''}</div>`; }).join('')
       || (L.busy ? '<div class="card msg">불러오는 중…</div>' : `<div class="card msg">${isMaster() && !L.drv ? '위에서 기사를 골라 주세요.' : q ? '검색 결과가 없어요.' : dLbl(L.d) + ' 배정된 거래처가 아직 없어요. 풀필먼트 담당자가 로케이션을 넣으면 여기 떠요.'}</div>`);
   }
-  async function lcLoad() {
+  async function lcLoad(fresh) {
     if (!loggedIn() || L.busy) return;
     L.busy = true; $('lc-warn').hidden = true; lcUi();
     try {
-      let j = await drv({ act: 'list', date: L.d, driver: L.drv });
+      let j = await drv({ act: 'list', date: L.d, driver: L.drv, fresh: fresh === true });
       // 오늘 배정이 없고 처음 열었으면 → 내일 것을 자동으로
       if (L.auto && !isMaster() && !j.records.length && L.d === today()) { const j2 = await drv({ act: 'list', date: addDay(L.d, 1) }); if (j2.records.length) { L.d = addDay(L.d, 1); j = j2; } }
       L.auto = false; L.recs = j.records || []; L.prog = j.progress; L.departed = j.departed; if (j.drivers) L.drivers = j.drivers;
@@ -506,7 +506,7 @@
   }
   $('lc-prev').onclick = () => { L.d = addDay(L.d, -1); L.auto = false; lcLoad(); };
   $('lc-next').onclick = () => { L.d = addDay(L.d, 1); L.auto = false; lcLoad(); };
-  $('lc-re').onclick = () => lcLoad();
+  $('lc-re').onclick = () => lcLoad(true);
   $('lc-drv').onchange = () => { L.drv = $('lc-drv').value; lcLoad(); };
   $('lc-q').oninput = () => lcUi();
   $('lc-list').onclick = async (ev) => {

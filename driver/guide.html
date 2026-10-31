@@ -106,7 +106,8 @@
     <div class="kv"><label>기기 식별자</label><code>본인 이름 (위펀오피스 등록 이름, 띄어쓰기 없이)</code></div>
     <div class="kv"><label>서버 URL <button data-copy="srv">복사</button></label><code id="srv">https://evyxvhqerfuqmzwjhkgz.supabase.co/functions/v1/loc</code></div>
     <div class="kv"><label>위치 정확도</label><code>높음</code></div>
-    <div class="kv"><label>거리 (미터)</label><code>50</code></div>
+    <div class="kv"><label>거리 (미터)</label><code>100</code></div>
+    <div class="kv"><label>전송 간격 (초)</label><code>60</code></div>
     <div class="kv"><label>정지 중 위치 전송 간격 (초)</label><code>300</code></div>
     <div class="tip">고급 설정은 켜고, 오프라인 버퍼링·정지 상태 감지 ON, 비밀번호는 비워 두세요.</div>
     </details>
@@ -169,7 +170,7 @@
   document.querySelectorAll('.tabs button').forEach((b) => { b.onclick = () => show(b.dataset.os); });
   show(os);
   const LOC = 'https://evyxvhqerfuqmzwjhkgz.supabase.co/functions/v1/loc';
-  const tcUrl = (n) => 'org.traccar.client://config?' + new URLSearchParams({ url: LOC, id: n, accuracy: 'high', distance: '50', interval: '30', heartbeat: '300', angle: '0', buffer: 'true', stopDetection: 'true', wakeLock: 'true' }).toString();
+  const tcUrl = (n) => 'org.traccar.client://config?' + new URLSearchParams({ url: LOC, id: n, accuracy: 'high', distance: '100', interval: '60', heartbeat: '300', angle: '0', buffer: 'true', stopDetection: 'true', wakeLock: 'true' }).toString();
   const nameEl = document.getElementById('tc-name'), linkEl = document.getElementById('tc-link');
   let qr = null;
   function tcRender() {

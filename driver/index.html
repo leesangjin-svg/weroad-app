@@ -56,6 +56,31 @@
   button.sm{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:8px;padding:3px 9px;font:inherit;font-size:12px}
   details summary{cursor:pointer}
   .ok{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#BBF7D0}
+  [hidden]{display:none!important}
+  .lc-bar{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .lc-bar button{border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.2);color:#fff;border-radius:10px;padding:9px 12px;font:inherit;font-size:15px;font-weight:700}
+  .lc-bar .d{flex:1;text-align:center;font-size:17px;font-weight:800}
+  .lc-bar select{flex:1;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;border-radius:10px;padding:9px;font:inherit;font-size:15px;font-weight:700}
+  .lc-prog{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+  .lc-prog .kv b{font-size:17px}
+  #lc-q{width:100%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;border-radius:12px;padding:12px;font-size:16px;font-family:inherit;margin-bottom:12px}
+  .lc{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+  .lc.done{opacity:.55}
+  .lc-h{display:flex;align-items:center;gap:8px}
+  .lc-h .sq{min-width:30px;height:30px;border-radius:9px;background:#3E6AF2;display:grid;place-items:center;font-weight:900;font-size:14px;flex:none}
+  .lc-h b{font-size:16.5px;flex:1;line-height:1.3}
+  .lc-tg{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px}
+  .lc-tg.fz{background:#f5c4b3;color:#4a1b0c}.lc-tg.ic{background:#b5d4f4;color:#042c53}
+  .lc-r{display:flex;align-items:center;gap:10px;border-radius:12px;padding:9px 10px;margin-top:8px}
+  .lc-r.a{background:rgba(251,191,36,.12)}.lc-r.c{background:rgba(56,189,248,.13)}
+  .lc-r label{font-size:12.5px;font-weight:800;opacity:.8;width:30px;flex:none}
+  .lc-r .loc{flex:1;font-size:21px;font-weight:900;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+  .lc-r .loc.none{font-size:14px;font-weight:600;opacity:.5}
+  .lc-r.ck .loc{text-decoration:line-through;opacity:.5}
+  .lc-r .cb{width:38px;height:38px;border-radius:10px;border:2px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:20px;font-weight:900;flex:none}
+  .lc-r.ck .cb{background:#22C55E;border-color:#22C55E}
+  .lc-r .cb:disabled{opacity:.35}
+  .lc-nt{font-size:12.5px;opacity:.7;margin-top:6px}
   button.big.save{background:linear-gradient(135deg,#3E6AF2,#8B5CF6);box-shadow:0 10px 30px rgba(62,106,242,.35);font-size:20px;padding:18px}
   .log{font-size:11.5px;opacity:.55;max-height:90px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin-top:10px}
 </style>
@@ -72,7 +97,19 @@
 </div>
 
 <div id="main" hidden>
-  <div class="tabs"><button data-tab="loc">출근</button><button class="on" data-tab="rec">퇴근 기록</button></div>
+  <div class="tabs"><button data-tab="loc">출근</button><button data-tab="lc">로케이션</button><button class="on" data-tab="rec">퇴근 기록</button></div>
+  <div id="t-lc" hidden>
+    <div class="card">
+      <div class="name">로케이션<small id="lc-sub">풀필먼트 로케이션 · 배송 순번대로</small></div>
+      <div class="lc-bar"><button id="lc-prev">◀</button><span class="d" id="lc-d">—</span><button id="lc-next">▶</button><button id="lc-re">↻</button></div>
+      <div class="lc-bar" id="lc-mb" hidden><select id="lc-drv"><option value="">기사 선택</option></select></div>
+      <div class="lc-prog" id="lc-prog"></div>
+    </div>
+    <input id="lc-q" placeholder="거래처 이름·로케이션 검색" autocomplete="off">
+    <div class="card warn" id="lc-warn" hidden></div>
+    <div id="lc-list"></div>
+    <div class="card msg">· 로케이션은 풀필먼트 담당자가 위펀풀필먼트 WEB에 넣은 그대로 보여요.<br>· 상차하면서 ☐를 누르면 풀필먼트에도 상차 체크가 같이 기록돼요.<br>· 출차 처리된 뒤에는 체크를 바꿀 수 없어요 (관리자에게 문의).</div>
+  </div>
   <div id="t-rec">
     <div class="card f">
       <div class="name" id="nm2">—<small>오늘 운행 마치고 적어 주세요</small></div>
@@ -103,13 +140,14 @@
     </div>
   </div>
   <button class="big" id="a-in">출근</button>
+  <button class="big stop" id="a-out" hidden>퇴근</button>
   <div style="text-align:right;margin:-6px 0 10px"><a href="guide.html" style="color:#9CB4FF;font-size:14px;font-weight:700">📖 사용 가이드</a></div>
   <div class="card ok" id="a-ok" hidden></div>
   <div class="card warn" id="a-warn" hidden></div>
   <div class="card msg" id="app-help" hidden>
     <b>위로드 앱 상태</b>
     <div style="margin-top:6px;line-height:1.8" id="app-st">—</div>
-    <div style="margin-top:6px">· 출근 버튼을 누르면 위치 전송이 켜지고 상단 알림에 "출근 중"이 떠요. 화면 꺼도, 네비·사진 찍어도 계속 보내요.<br>· 퇴근 기록을 저장하면 자동으로 꺼져요.<br>· 처음엔 위치 권한 <b>"항상 허용"</b>, 알림 허용, 배터리 <b>"제한 없음"</b>을 물어요 — 모두 허용해 주세요.</div>
+    <div style="margin-top:6px">· 출근 버튼을 누르면 위치 전송이 켜지고 상단 알림에 "출근 중"이 떠요. 화면 꺼도, 네비·사진 찍어도 계속 보내요.<br>· 퇴근하면 자동으로 꺼져요.<br>· 처음엔 위치 권한 <b>"항상 허용"</b>, 알림 허용, 배터리 <b>"제한 없음"</b>을 물어요 — 모두 허용해 주세요.</div>
     <div style="margin-top:8px"><button class="sm" id="app-batt">배터리 제한 없음 설정</button> <button class="sm" id="app-perm">앱 권한 설정 열기</button></div>
   </div>
   <div class="card msg" id="apk-help" hidden>
@@ -147,7 +185,7 @@
   <div class="log" id="log"></div>
   </div>
 </div>
-<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v14</span></div>
+<div class="foot">위로드 WeRoad · 위펀 운송관리 · <span id="ver">v15</span></div>
 
 <script>
 (function () {
@@ -284,8 +322,21 @@
   try { R.hist = JSON.parse(localStorage.getItem(LS + '-hist') || '[]'); } catch (e) { R.hist = []; }
   const vlist = () => String(cfg.v || '').split(/[,\s]+/).map((x) => x.trim()).filter(Boolean);
   const won = (n) => Number(n || 0).toLocaleString('ko-KR');
-  document.querySelectorAll('.tabs button').forEach((b) => { b.onclick = () => { document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); $('t-rec').hidden = b.dataset.tab !== 'rec'; $('t-loc').hidden = b.dataset.tab !== 'loc'; }; });
-  if (!isMaster() && (localStorage.getItem(LS + '-on') === '1' || new Date().getHours() < 14)) document.querySelector('.tabs button[data-tab=loc]').click();
+  // 10/31: 기사 구분 — 법인기사(핫픽스) = 위로드 차량관리에 탑승자로 등록된 기사 → 출근·로케이션·퇴근 기록(주행거리·주유비)
+  //                     지입기사(운송사)  = 그 외 → 출근(퇴근 버튼 포함)·로케이션만
+  const tabBtn = (t) => document.querySelector('.tabs button[data-tab=' + t + ']');
+  const isCorp = () => isMaster() || (R.mine || []).length > 0;
+  function showTab(t) { document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x.dataset.tab === t)); $('t-rec').hidden = t !== 'rec'; $('t-loc').hidden = t !== 'loc'; $('t-lc').hidden = t !== 'lc'; if (t === 'lc') setTimeout(lcLoad, 0); try { sessionStorage.setItem('wr-tab', t); } catch (e) { /* noop */ } }
+  document.querySelectorAll('.tabs button').forEach((b) => { b.onclick = () => showTab(b.dataset.tab); });
+  function applyType(first) {
+    const corp = isCorp();
+    tabBtn('rec').hidden = !corp; tabBtn('loc').hidden = isMaster();
+    try { localStorage.setItem(LS + '-type', corp ? 'corp' : 'jiip'); } catch (e) { /* noop */ }
+    const cur = document.querySelector('.tabs button.on');
+    if (first) { let t = ''; try { t = sessionStorage.getItem('wr-tab') || ''; } catch (e) { /* noop */ } if (!t || tabBtn(t).hidden) t = isMaster() ? 'lc' : (!corp || localStorage.getItem(LS + '-on') === '1' || new Date().getHours() < 14) ? 'loc' : 'rec'; showTab(t); }
+    else if (!cur || cur.hidden) showTab(isMaster() ? 'lc' : 'loc');
+    if (typeof aUi === 'function' && A) aUi();
+  }
   function rUi() {
     const sel = $('r-v'), cur = sel.value;
     const mine = (R.mine || []).map((m) => m.plate), extra = vlist().filter((v) => !mine.includes(v));
@@ -313,7 +364,7 @@
       try { const ps = await rpc('shop_plates', {}); const all = (ps || []).map((x) => x.plate).filter(Boolean); if (all.length) { R.all = [...new Set([...(R.all || []), ...all])].sort(); localStorage.setItem(LS + '-veh', JSON.stringify({ mine: R.mine || [], all: R.all })); } }
       catch (e) { log('전체 차량 목록 실패 ' + e.message); }
     }
-    rUi();
+    rUi(); applyType(false);
     if (R.vehErr && /로그인/.test(R.vehErr)) $('r-hint').innerHTML = '로그인이 만료됐어요. 맨 아래 <b>다른 이름으로 로그인</b>을 눌러 다시 로그인하면 내 차량이 자동으로 잡혀요. (지금도 목록에서 골라 기록할 수 있어요)';
   }
   async function rLoadHist() {
@@ -348,9 +399,10 @@
   };
   // 10/30: 계기판 km·주유 금액은 입력하면서 1,234,567 처럼 쉼표 표시 (저장할 때는 숫자만)
   ['r-km', 'r-fuel'].forEach((id) => { const el = $(id); el.addEventListener('input', () => { const d = el.value.replace(/[^\d]/g, ''); el.value = d ? Number(d).toLocaleString('ko-KR') : ''; }); });
-  if (!$('main').hidden) { rUi(); rLoadVeh(); rFlush().then(rLoadHist); }
+  var A = null;
+  if (!$('main').hidden) { applyType(true); rUi(); rLoadVeh(); rFlush().then(rLoadHist); }
   // ---- 출근 체크 + 위치 앱(Traccar) 수신 확인 (v9)
-  const A = { st: null };
+  A = { st: null };
   const hm = (x) => x ? new Date(x).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '—';
   function aUi() {
     const st = A.st || {}, att = st.att || {};
@@ -363,6 +415,7 @@
     $('stt').textContent = good ? '위치 앱 정상 수신 중' : age == null ? '위치 앱 설정이 필요해요 (아래 안내)' : '위치가 ' + $('a-last').textContent + ' 이후 안 와요 — 앱 켜져 있는지 확인';
     $('st').classList.toggle('on', good);
     $('a-in').textContent = att.in_at ? '출근 완료 ' + hm(att.in_at) + ' · 다시 누르면 시각 유지' : '출근';
+    $('a-out').hidden = isCorp() || !att.in_at; $('a-out').textContent = att.out_at ? '퇴근 완료 ' + hm(att.out_at) : '퇴근';
     $('tmp-help').hidden = APP; $('tc-help').hidden = APP || IS_ANDROID; $('app-help').hidden = !APP; $('apk-help').hidden = APP || !IS_ANDROID;
     if (!good && !APP && !IS_ANDROID) $('tc-help').open = true;
     $('tc-id').textContent = cfg.n || '—'; $('tc-url').textContent = TRACCAR_URL;
@@ -387,6 +440,68 @@
     try { const r = await punch('in'); await aLoad(); if (r && r.in_at) A.st = { ...(A.st || {}), att: r }; ok.hidden = false; ok.innerHTML = `<b>출근 ${hm((A.st.att || {}).in_at)}</b> — 수고하세요!` + ((A.st.last_age_min != null && A.st.last_age_min <= 10) ? '' : '<br>위치 앱이 아직 안 보내고 있어요. 아래 안내대로 켜 주세요.'); }
     catch (e) { w.hidden = false; w.textContent = '출근 체크 실패: ' + e.message; }
     $('a-in').disabled = false; aUi();
+  };
+  $('a-out').onclick = async () => {
+    const ok = $('a-ok'), w = $('a-warn'); ok.hidden = true; w.hidden = true;
+    if (((A.st || {}).att || {}).out_at && !confirm('이미 퇴근 처리됐어요. 퇴근 시각을 지금으로 바꿀까요?')) return;
+    $('a-out').disabled = true;
+    try { await punch('out'); if (APP) { try { window.WeRoadApp.stop(); } catch (e) { /* noop */ } } await aLoad(); ok.hidden = false; ok.innerHTML = `<b>퇴근 ${hm(((A.st || {}).att || {}).out_at)}</b> — 오늘도 수고하셨어요! 위치 전송도 꺼졌어요.`; }
+    catch (e) { w.hidden = false; w.textContent = '퇴근 체크 실패: ' + e.message; }
+    $('a-out').disabled = false; aUi();
+  };
+  // ---- 로케이션 (v15): 위펀풀필먼트 WEB(wf-full) 그날 내 거래처 · 상온/저온 로케이션 · 상차 체크 → 서버 함수 drv
+  const L = { d: today(), recs: [], drivers: [], drv: '', busy: false, auto: true, departed: null, prog: null };
+  const esc = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const addDay = (d, n) => { const t = new Date(d + 'T00:00:00'); t.setDate(t.getDate() + n); return t.toLocaleDateString('sv-SE'); };
+  const dLbl = (d) => { const t = new Date(d + 'T00:00:00'); const w = '일월화수목금토'[t.getDay()]; return `${t.getMonth() + 1}/${t.getDate()} (${w})` + (d === today() ? ' 오늘' : d === addDay(today(), 1) ? ' 내일' : ''); };
+  async function drv(body) {
+    const r = await fetch(SERVER + '/functions/v1/drv', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY }, body: JSON.stringify({ name: cfg.n, token: cfg.tok, ...body }) });
+    const j = await r.json().catch(() => ({ ok: false, error: 'HTTP ' + r.status }));
+    if (r.status === 401) throw new Error('로그인이 만료됐어요. 맨 아래 "다른 이름으로 로그인"으로 다시 로그인해 주세요.');
+    if (!j.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    return j;
+  }
+  function lcUi() {
+    $('lc-d').textContent = dLbl(L.d);
+    $('lc-mb').hidden = !isMaster();
+    if (isMaster()) { const s = $('lc-drv'); s.innerHTML = '<option value="">기사 선택 (' + L.drivers.length + '명)</option>' + L.drivers.map((n) => `<option ${n === L.drv ? 'selected' : ''}>${esc(n)}</option>`).join(''); }
+    const p = L.prog, n = L.recs.length;
+    $('lc-prog').innerHTML = n ? `<div class="kv"><label>거래처</label><b>${n}<i>곳</i></b></div><div class="kv"><label>상온 상차</label><b>${p ? p.ambient_done + '/' + p.ambient_total : '—'}</b></div><div class="kv"><label>저온 상차</label><b>${p ? p.chilled_done + '/' + p.chilled_total : '—'}</b></div>` : '';
+    $('lc-sub').textContent = L.departed ? '출차 완료 · 체크 변경은 관리자에게' : (isMaster() && !L.drv ? '관리자 — 기사를 고르면 그 기사 로케이션이 보여요' : '풀필먼트 로케이션 · 배송 순번대로');
+    const q = $('lc-q').value.trim().toLowerCase();
+    const rs = L.recs.filter((r) => !q || [r.name, r.amb, r.chl, r.code].some((x) => String(x || '').toLowerCase().includes(q)));
+    const can = !L.departed && (!isMaster() || !!L.drv);
+    const multi = new Set(L.recs.map((r) => r.course)).size > 1;
+    const row = (r, t) => { const a = t === 'a', loc = a ? r.amb : r.chl, need = a ? r.needA : r.needC, ck = a ? r.ckA : r.ckC;
+      return `<div class="lc-r ${a ? 'a' : 'c'} ${ck ? 'ck' : ''}"><label>${a ? '상온' : '저온'}</label><span class="loc ${loc ? '' : 'none'}">${loc ? esc(loc) : (need ? '로케이션 없음' : '상품 없음')}</span>${need ? `<button class="cb" data-ck="${r.id}" data-t="${a ? 'ambient' : 'chilled'}" ${can ? '' : 'disabled'}>${ck ? '✓' : ''}</button>` : ''}</div>`; };
+    $('lc-list').innerHTML = rs.map((r) => { const done = (!r.needA || r.ckA) && (!r.needC || r.ckC);
+      return `<div class="lc ${done && (r.needA || r.needC) ? 'done' : ''}"><div class="lc-h"><span class="sq">${r.seq != null ? esc(r.seq) : '·'}</span><b>${esc(r.name)}</b>${multi ? `<span class="lc-tg" style="background:#334155;color:#E2E8F0">${esc(String(r.course || '').replace(/^스\)/, ''))}</span>` : ''}${r.frozen ? '<span class="lc-tg fz">냉동</span>' : ''}${r.ice ? '<span class="lc-tg ic">얼음</span>' : ''}</div>${row(r, 'a')}${row(r, 'c')}${r.note ? `<div class="lc-nt">📝 ${esc(r.note)}</div>` : ''}</div>`; }).join('')
+      || (L.busy ? '<div class="card msg">불러오는 중…</div>' : `<div class="card msg">${isMaster() && !L.drv ? '위에서 기사를 골라 주세요.' : q ? '검색 결과가 없어요.' : dLbl(L.d) + ' 배정된 거래처가 아직 없어요. 풀필먼트 담당자가 로케이션을 넣으면 여기 떠요.'}</div>`);
+  }
+  async function lcLoad() {
+    if (!loggedIn() || L.busy) return;
+    L.busy = true; $('lc-warn').hidden = true; lcUi();
+    try {
+      let j = await drv({ act: 'list', date: L.d, driver: L.drv });
+      // 오늘 배정이 없고 처음 열었으면 → 내일 것을 자동으로
+      if (L.auto && !isMaster() && !j.records.length && L.d === today()) { const j2 = await drv({ act: 'list', date: addDay(L.d, 1) }); if (j2.records.length) { L.d = addDay(L.d, 1); j = j2; } }
+      L.auto = false; L.recs = j.records || []; L.prog = j.progress; L.departed = j.departed; if (j.drivers) L.drivers = j.drivers;
+    } catch (e) { $('lc-warn').hidden = false; $('lc-warn').textContent = '로케이션을 못 불러왔어요: ' + e.message; L.recs = []; }
+    L.busy = false; lcUi();
+  }
+  $('lc-prev').onclick = () => { L.d = addDay(L.d, -1); L.auto = false; lcLoad(); };
+  $('lc-next').onclick = () => { L.d = addDay(L.d, 1); L.auto = false; lcLoad(); };
+  $('lc-re').onclick = () => lcLoad();
+  $('lc-drv').onchange = () => { L.drv = $('lc-drv').value; lcLoad(); };
+  $('lc-q').oninput = () => lcUi();
+  $('lc-list').onclick = async (ev) => {
+    const b = ev.target.closest('button[data-ck]'); if (!b || b.disabled) return;
+    const r = L.recs.find((x) => String(x.id) === b.dataset.ck); if (!r) return;
+    const t = b.dataset.t, now = t === 'ambient' ? !r.ckA : !r.ckC;
+    if (t === 'ambient') r.ckA = now; else r.ckC = now; lcUi();   // 먼저 화면에 반영
+    try { const j = await drv({ act: 'check', date: L.d, driver: L.drv, id: r.id, temp: t, checked: now }); L.recs = j.records || L.recs; L.prog = j.progress; L.departed = j.departed; }
+    catch (e) { if (t === 'ambient') r.ckA = !now; else r.ckC = !now; $('lc-warn').hidden = false; $('lc-warn').textContent = '상차 체크 실패: ' + e.message; }
+    lcUi();
   };
   document.querySelectorAll('button[data-copy]').forEach((b) => { b.onclick = async () => { const t = $(b.dataset.copy).textContent; try { await navigator.clipboard.writeText(t); b.textContent = '복사됨'; setTimeout(() => { b.textContent = '복사'; }, 1500); } catch (e) { prompt('복사해 주세요', t); } }; });
   if (!$('main').hidden) { aUi(); aLoad(); }
